@@ -1,16 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <title>AutoComplate</title>
+    <style type="text/css">
 
-        <title>the5fire.com-backbone.js-Hello World</title>
+        ul.autocomplete {
+            display: none;
+            position: absolute;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 3px 0;
+        }
+
+        ul.autocomplete li {
+            list-style: none;
+            margin: 0;
+            padding: 5px 7px;
+        }
+
+        ul.autocomplete li.active, ul.autocomplete li:hover {
+            cursor: pointer;
+            background-color: #d3d3d3;
+        }
+
+        ul.autocomplete li a {
+            color: #3d3d3d;
+            text-decoration: none;
+        }
+
+
+        input {
+            font-size: 17px;
+            padding: 3px;
+            margin: 0;
+            outline: none;
+        }
+
+        #example, #selected {
+            float: left;
+            margin-right: 55px;
+        }
+
+        #selected {
+            display: none;
+            margin: 0;
+        }
+
+        #selected p {
+            margin: 0;
+            width: 430px;
+            padding: 10px;
+            background-color: #fafafa;
+            color: #404040;
+        }
+
+        
+
+        #contribution p {
+            padding: 20px;
+            border: 1px solid #e9e9e9;
+        }
+
+    </style>
 </head>
 <body>
 <section>
     <div id="example">
         <h3>Example</h3>
         <form action="#">
-            <input type="text" placeholder="Select a plugin (type backbone)" id="plugin" />
+            <input type="text" placeholder="Stock symbol or short" id="plugin" onkeyup="this.value=this.value.toLocaleUpperCase()"/>
         </form>
     </div>
     <div id="selected">
@@ -23,13 +82,17 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 <script type="text/javascript" src="http://backbonejs.org/backbone-min.js"></script>
-<script src="http://fatiherikli.github.io/backbone-autocomplete/media/backbone.autocomplete.js"></script>
+<script src="/js/backbone.autocomplete.js"></script>
+<script src="/js/stock.list.objects.js"></script>
 <script type="text/javascript">
     $(function () {
 
         var Plugin = Backbone.Model.extend({
             label: function () {
-                return this.get("name");
+                return this.get("symbol") +"  "+ this.get("short") ;
+            },
+            label_for_show: function(){
+                return this.get("symbol") +"  "+ this.get("name") ;
             }
         });
 
@@ -37,27 +100,14 @@
             model: Plugin
         });
 
-        var plugins = new PluginCollection([
-            {"name": "backbone-autocomplete"},
-            {"name": "backbone-memento"},
-            {"name": "backbone-validations"},
-            {"name": "backbone-chosen"},
-            {"name": "backbone-relational"},
-            {"name": "backbone-bindings"},
-            {"name": "backbone-boilerplate"},
-            {"name": "backbone-traversal"},
-            {"name": "backbone-factory"},
-            {"name": "jquery"},
-            {"name": "jquery-ui"},
-            {"name": "angular.js"},
-            {"name": "keymaster.js"}
-        ]);
+        // object {"symbol":"sz000030","short":"FAGF","name":"富奥股份"},
+        var plugins = new PluginCollection(STOCK_LIST_OBJECTS);
 
         new AutoCompleteView({
             input: $("#plugin"),
             model: plugins,
             onSelect: function (model) {
-                $("#selected").show().find("p").html(model.label());
+                $("#selected").show().find("p").html(model.label_for_show());
             }
         }).render();
 
