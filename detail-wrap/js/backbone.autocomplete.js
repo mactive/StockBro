@@ -8,7 +8,7 @@ var AutoCompleteItemView = Backbone.View.extend({
 
     render: function () {
         this.$el.html(_.template(this.template, {
-            "label": this.model.label()
+            "label": this.model.label_for_show()
         }));
         return this;
     },

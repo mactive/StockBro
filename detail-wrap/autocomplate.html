@@ -76,6 +76,9 @@
         <h3>Selected Item</h3>
         <p></p>
     </div>
+    <div id="chart">
+        <img src="" alt="">
+    </div>
 </section>
 
 </body>
@@ -87,12 +90,14 @@
 <script type="text/javascript">
     $(function () {
 
+
+        // AutoComplate 
         var Plugin = Backbone.Model.extend({
             label: function () {
                 return this.get("symbol") +"  "+ this.get("short") ;
             },
             label_for_show: function(){
-                return this.get("symbol") +"  "+ this.get("name") ;
+                return this.get("symbol") +" "+ this.get("name") ;
             }
         });
 
@@ -108,8 +113,11 @@
             model: plugins,
             onSelect: function (model) {
                 $("#selected").show().find("p").html(model.label_for_show());
+                $("#chart").find("img").attr('src','http://chart.7878.com/kd/'+model.get("symbol")+'.gif');
             }
         }).render();
+
+
 
     });
 </script>
