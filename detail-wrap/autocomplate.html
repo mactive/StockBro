@@ -18,6 +18,14 @@
     <div id="selected">
         <h3>Selected Item</h3>
         <p></p>
+        <div class="realtime">
+            <span class="symbol"></span>
+            <span class="name"></span>
+            <span class="open"></span>
+            <span class="close"></span>
+            <span class="high"></span>
+            <span class="low"></span>
+        </div>
     </div>
     <div id="chart">
         <img src="" alt="">
@@ -66,58 +74,117 @@
         }).render();
 
 
-        /* ================================
+        /* 
+         * =============================================================
          * fetch 
-         * ================================ 
+         * ============================================================= 
          */ 
 
-        window.AppModel=Backbone.Model.extend({
+        window.OneStockModel = Backbone.Model.extend({
             initialize:function(){
-                console.log('create a model');
-                this.bind("change:Name",function(){
-                    var name=this.get('Name');
-                    alert('你改变了name属性为：'+name);
-                });
-                this.bind('error',function(model,error){
-                    alert(error);
-                })
+                console.log("create a model");
             },
             defaults:{
-                n:'初始值',
-                ID:'初始ID'
-            },
-        //  url:'http://localhost:8880/backbone'
-        })
-        window.AppCollection=Backbone.Collection.extend({
-            model:AppModel,
+                symbol:'SH000000',
+                time:'获取时间',
+                name:'股票时间',
+                close:'',
+                open:'',
+                high:'',
+                low:'',
+                current:'',
+                volumn:'',
+                amount:'',
+                buy1:'',
+                buy2:'',
+                buy3:'',
+                buy4:'',
+                buy5:'',
+                sell1:'',
+                sell2:'',
+                sell3:'',
+                sell4:'',
+                sell5:'',
+                volumn_buy1:'',
+                volumn_buy2:'',
+                volumn_buy3:'',
+                volumn_buy4:'',
+                volumn_buy5:'',
+                volumn_sell1:'',
+                volumn_sell2:'',
+                volumn_sell3:'',
+                volumn_sell4:'',
+                volumn_sell5:''
+            }
+        });
+
+        window.OneShockCollection=Backbone.Collection.extend({
+            model:OneStockModel,
             url:'http://api.stockpro.com/stock/realtime/ddd',
             initialize:function(){
                 this.bind('reset',this.showAll);
                 this.bind('add',this.showAll);
             },
+            parse:function(response){
+                console.log('parse first');
+                var result = {
+                    symbol: response.c,
+                    time:   response.t,
+                    name:   response.n,
+                    close:  response.lc,
+                    open:   response.o,
+                    high:   response.h,
+                    low:    response.l,
+                    current:    response.np,
+                    volumn: response.v,
+                    amount: response.a,
+                    buy1:   response.bp[0],
+                    buy2:   response.bp[1],
+                    buy3:   response.bp[2],
+                    buy4:   response.bp[3],
+                    buy5:   response.bp[4],
+                    sell1:  response.sp[0],
+                    sell2:  response.sp[1],
+                    sell3:  response.sp[2],
+                    sell4:  response.sp[3],
+                    sell5:  response.sp[4],
+                    volumn_buy1:    response.bv[0],
+                    volumn_buy2:    response.bv[1],
+                    volumn_buy3:    response.bv[2],
+                    volumn_buy4:    response.bv[3],
+                    volumn_buy5:    response.bv[4],
+                    volumn_sell1:   response.sv[0],
+                    volumn_sell2:   response.sv[1],
+                    volumn_sell3:   response.sv[2],
+                    volumn_sell4:   response.sv[3],
+                    volumn_sell5:   response.sv[4]
+                };
+
+                return result;
+
+            },
             showAll:function(){
                 this.each(function(model){
-                    alert(model.get('n')+','+model.get('ID'))
+
+                    alert(model.get('name'));
                 })
             },
         })
-
-        $(function(){
-            var test=new AppCollection();
-         test.fetch();
-            // test.fetch({url:'http://api.stockpro.com/stock/realtime/ddd',
-            //     success:function(collection,response){
-            //         collection.each(function(book){
-            //             alert(book.get('n'));
-            //         })
-            //     },
-            //     error:function(collection, response){
-            //         console.log(collection);
-            //         console.log(response);
-            //         alert('error');
-            //     }
-
-            // })
+        
+        var test = new OneShockCollection();
+        test.fetch({url:'http://api.stockpro.com/stock/realtime/ddd',
+            success:function(collection,response){
+                collection.each(function(single){
+                    console.log("success"+single.get('name'));
+                    console.log("success"+single.get('buy1'));
+                    console.log("success"+single.get('volumn_buy1'));
+                })
+            },
+            error:function(collection, response){
+                console.log(collection);
+                console.log(response);
+                alert('error');
+            }
         })
 
 
