@@ -3,66 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>AutoComplate</title>
-    <style type="text/css">
 
-        ul.autocomplete {
-            display: none;
-            position: absolute;
-            background-color: #f8f8f8;
-            margin: 0;
-            padding: 3px 0;
-        }
-
-        ul.autocomplete li {
-            list-style: none;
-            margin: 0;
-            padding: 5px 7px;
-        }
-
-        ul.autocomplete li.active, ul.autocomplete li:hover {
-            cursor: pointer;
-            background-color: #d3d3d3;
-        }
-
-        ul.autocomplete li a {
-            color: #3d3d3d;
-            text-decoration: none;
-        }
-
-
-        input {
-            font-size: 17px;
-            padding: 3px;
-            margin: 0;
-            outline: none;
-        }
-
-        #example, #selected {
-            float: left;
-            margin-right: 55px;
-        }
-
-        #selected {
-            display: none;
-            margin: 0;
-        }
-
-        #selected p {
-            margin: 0;
-            width: 430px;
-            padding: 10px;
-            background-color: #fafafa;
-            color: #404040;
-        }
-
-        
-
-        #contribution p {
-            padding: 20px;
-            border: 1px solid #e9e9e9;
-        }
-
-    </style>
+    <!-- libraries -->
+    <link href="css/autocomplate.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <section>
@@ -90,8 +33,11 @@
 <script type="text/javascript">
     $(function () {
 
+        /* ================================
+         * AutoComplate 
+         * ================================ 
+         */ 
 
-        // AutoComplate 
         var Plugin = Backbone.Model.extend({
             label: function () {
                 return this.get("symbol") +"  "+ this.get("short") ;
@@ -112,11 +58,67 @@
             input: $("#plugin"),
             model: plugins,
             onSelect: function (model) {
+                // AutoComplate list
                 $("#selected").show().find("p").html(model.label_for_show());
+                // Chart Image
                 $("#chart").find("img").attr('src','http://chart.7878.com/kd/'+model.get("symbol")+'.gif');
             }
         }).render();
 
+
+        /* ================================
+         * fetch 
+         * ================================ 
+         */ 
+
+        window.AppModel=Backbone.Model.extend({
+            initialize:function(){
+                console.log('create a model');
+                this.bind("change:Name",function(){
+                    var name=this.get('Name');
+                    alert('你改变了name属性为：'+name);
+                });
+                this.bind('error',function(model,error){
+                    alert(error);
+                })
+            },
+            defaults:{
+                n:'初始值',
+                ID:'初始ID'
+            },
+        //  url:'http://localhost:8880/backbone'
+        })
+        window.AppCollection=Backbone.Collection.extend({
+            model:AppModel,
+            url:'http://api.stockpro.com/stock/realtime/ddd',
+            initialize:function(){
+                this.bind('reset',this.showAll);
+                this.bind('add',this.showAll);
+            },
+            showAll:function(){
+                this.each(function(model){
+                    alert(model.get('n')+','+model.get('ID'))
+                })
+            },
+        })
+
+        $(function(){
+            var test=new AppCollection();
+         test.fetch();
+            // test.fetch({url:'http://api.stockpro.com/stock/realtime/ddd',
+            //     success:function(collection,response){
+            //         collection.each(function(book){
+            //             alert(book.get('n'));
+            //         })
+            //     },
+            //     error:function(collection, response){
+            //         console.log(collection);
+            //         console.log(response);
+            //         alert('error');
+            //     }
+
+            // })
+        })
 
 
     });
