@@ -63,7 +63,7 @@
         <span class="btn-flat white">最高价<%= stock_info %></span>
         <span class="btn-flat white">最低价<%= stock_info %></span>
     </script>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.1.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 <script type="text/javascript" src="http://backbonejs.org/backbone-min.js"></script>
 <script src="/js/backbone.autocomplete.js"></script>
@@ -111,28 +111,116 @@
          */ 
 
         // Person Model
-        var Person = Backbone.Model.extend({
-            defaults: {
-                name: 'Guest User',
-                age: 30,
-                occupation: 'worker'
+        var OneStockModel = Backbone.Model.extend({
+            initialize:function(){
+                console.log("create a model");
+            },
+            defaults:{
+                symbol:'',
+                time:'',
+                name:'',
+                close:'',
+                open:'',
+                high:'',
+                low:'',
+                current:'',
+                volumn:'',
+                amount:'',
+                buy1:'',
+                buy2:'',
+                buy3:'',
+                buy4:'',
+                buy5:'',
+                sell1:'',
+                sell2:'',
+                sell3:'',
+                sell4:'',
+                sell5:'',
+                volumn_buy1:'',
+                volumn_buy2:'',
+                volumn_buy3:'',
+                volumn_buy4:'',
+                volumn_buy5:'',
+                volumn_sell1:'',
+                volumn_sell2:'',
+                volumn_sell3:'',
+                volumn_sell4:'',
+                volumn_sell5:''
             }
         });
 
         // A List of People
-        var PeopleCollection = Backbone.Collection.extend({
-            model: Person
+        var StocksCollection = Backbone.Collection.extend({
+            model: OneStockModel,
+            parse:function(objects){
+                var result = {};
+                console.log('parse first');
+                $.each(objects , function(key, response) {
+
+                    var item = {
+                        symbol: response.c,
+                        time:   response.t,
+                        name:   response.n,
+                        close:  response.lc,
+                        open:   response.o,
+                        high:   response.h,
+                        low:    response.l,
+                        current:    response.np,
+                        volumn: response.v,
+                        amount: response.a,
+                        buy1:   response.bp[0],
+                        buy2:   response.bp[1],
+                        buy3:   response.bp[2],
+                        buy4:   response.bp[3],
+                        buy5:   response.bp[4],
+                        sell1:  response.sp[0],
+                        sell2:  response.sp[1],
+                        sell3:  response.sp[2],
+                        sell4:  response.sp[3],
+                        sell5:  response.sp[4],
+                        volumn_buy1:    response.bv[0],
+                        volumn_buy2:    response.bv[1],
+                        volumn_buy3:    response.bv[2],
+                        volumn_buy4:    response.bv[3],
+                        volumn_buy5:    response.bv[4],
+                        volumn_sell1:   response.sv[0],
+                        volumn_sell2:   response.sv[1],
+                        volumn_sell3:   response.sv[2],
+                        volumn_sell4:   response.sv[3],
+                        volumn_sell5:   response.sv[4]
+                    };
+
+                    objects[key] = item;
+                });
+
+                return objects;
+            },
+            renderItem:function(){
+                console.log('renderItem');
+                this.each(function(single) {
+                    console.log("collection symbol:");
+                    console.log(single.toJSON());
+
+                    var oneStockView = new OneStockView({ model: single });
+                    $('#stock_realtime').append(oneStockView.render().el);
+                }, this);
+            }
         });
 
 
         // View for all people
-        var PeopleView = Backbone.View.extend({
+        var StocksView = Backbone.View.extend({
             tagName: 'ul',
+            initialize: function(){
+                // this.listenTo(this.collection, 'add', this.render());
+            },
 
             render: function() {
                 this.collection.each(function(person) {
-                    var personView = new PersonView({ model: person });
-                    this.$el.append(personView.render().el);
+                    console.log(person);
+
+                    var oneStockView = new OneStockView({ model: person });
+                    this.$el.append(oneStockView.render().el);
                 }, this);
 
                 return this;
@@ -140,26 +228,44 @@
         });
 
         // The View for a Person
-        var PersonView = Backbone.View.extend({
+        var OneStockView = Backbone.View.extend({
             tagName: 'li',
 
-
-            template: _.template($('#personTemplate').html() ),
+            template: _.template($('#realtime_template').html() ),
             
             render: function() {
-                this.$el.html( this.template(this.model.toJSON()) );
+                console.log("one stock view");
+
+                this.$el.html( this.template( {"stock_info":this.model.toJSON() } ) );
+                console.log(this);
                 return this;
             }
         });
 
-        var peopleCollection = new PeopleCollection(
-            {
-                name: 'Mohit Jain',
-                age: 26
-            });
+        
+        var theStocksCollection = new StocksCollection();
+        theStocksCollection.fetch({url:'http://api.stockbro.com/stock/realtime/ddd',
+            success:function(collection,response){
+                console.log(collection);
+                console.log(response);
+                theStocksCollection.renderItem();
 
-        var peopleView = new PeopleView({ collection: peopleCollection });
-        $(document.body).append(peopleView.render().el);
+                collection.each(function(single){
+                    console.log("collection symbol:"+single.get('symbol'));
+                    // console.log("success"+single.get('name'));
+                    // console.log("success"+single.get('volumn_buy1'));
+                })
+            },
+            error:function(collection, response){
+                console.log(collection);
+                console.log(response);
+                alert('error');
+            }
+        });
+
+
+        // var peopleView = new StocksView({ collection: theStocksCollection });
+        // $('#stock_realtime').append(peopleView.render().el);
 
 
 
