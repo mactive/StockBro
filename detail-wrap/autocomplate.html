@@ -1,11 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
     <title>AutoComplate</title>
 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- bootstrap -->
+    <link href="css/bootstrap/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/bootstrap/bootstrap-overrides.css" type="text/css" rel="stylesheet">
+
+    <!-- global styles -->
+    <link rel="stylesheet" type="text/css" href="css/layout.css">
+    <link rel="stylesheet" type="text/css" href="css/elements.css">
+    <link rel="stylesheet" type="text/css" href="css/icons.css">
+
+    <!-- libraries -->
+    <link rel="stylesheet" type="text/css" href="css/lib/font-awesome.css">
+    
+    <!-- this page specific styles -->
+    <link rel="stylesheet" href="css/compiled/web-app-icons.css" type="text/css" media="screen" />
+
+    <!-- open sans font -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
     <!-- libraries -->
     <link href="css/autocomplate.css" rel="stylesheet" type="text/css">
+    <link href="css/stock.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <section>
@@ -15,24 +40,29 @@
             <input type="text" placeholder="Stock symbol or short" id="plugin" onkeyup="this.value=this.value.toLocaleUpperCase()"/>
         </form>
     </div>
-    <div id="selected">
+    <div id="selected" class="span3 stat">
         <h3>Selected Item</h3>
         <p></p>
-        <div class="realtime">
-            <span class="symbol"></span>
-            <span class="name"></span>
-            <span class="open"></span>
-            <span class="close"></span>
-            <span class="high"></span>
-            <span class="low"></span>
-        </div>
     </div>
-    <div id="chart">
+    <div id="chart" class="clear">
         <img src="" alt="">
     </div>
+
+    <div id="stock_realtime" class="realtime">
+
+    </div>
+
 </section>
 
 </body>
+    <script type="text/template" id="realtime_template">
+        <span class="btn-flat white">代码<%= stock_info.symbol %></span>
+        <span class="btn-flat white">名称<%= stock_info.name %></span>
+        <span class="btn-flat white">昨收盘<%= stock_info.close %></span>
+        <span class="btn-flat white">今开盘<%= stock_info.open %></span>
+        <span class="btn-flat white">最高价<%= stock_info %></span>
+        <span class="btn-flat white">最低价<%= stock_info %></span>
+    </script>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 <script type="text/javascript" src="http://backbonejs.org/backbone-min.js"></script>
@@ -161,18 +191,17 @@
                 };
 
                 return result;
-
             },
-            showAll:function(){
+            showRealtime:function(){
                 this.each(function(model){
-
+                    // $('.realtime').html('<span>ddddd'+model.get('symbol')+' '+model.get('volumn')+'</span>');
                     alert(model.get('name'));
                 })
             },
         })
         
-        var test = new OneShockCollection();
-        test.fetch({url:'http://api.stockpro.com/stock/realtime/ddd',
+        var theCollection = new OneShockCollection();
+        theCollection.fetch({url:'http://api.stockpro.com/stock/realtime/ddd',
             success:function(collection,response){
                 collection.each(function(single){
                     console.log("success"+single.get('name'));
@@ -185,7 +214,32 @@
                 console.log(response);
                 alert('error');
             }
-        })
+        });
+
+        ///////////////////////////
+        window.OneStockView = Backbone.View.extend({
+            el: $("#stock_realtime"),
+            collection: theCollection,
+            initialize: function(){
+                console.log(theCollection);
+                console.log(theCollection.models);
+
+                this.listenTo(theCollection, 'showRealtime', this.render(stock_info));
+            },
+
+            render: function(stock_info) {
+                //使用underscore这个库，来编译模板
+
+                var template = _.template($("#realtime_template").html(),
+                        {stock_info:stock_info});
+
+                //this.el.html(template);
+                $(this.el).html(template);
+            },
+
+        });
+        var searchView = new OneStockView();
+
 
 
     });
