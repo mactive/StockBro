@@ -60,8 +60,8 @@
         <span class="btn-flat white">名称<%= stock_info.name %></span>
         <span class="btn-flat white">昨收盘<%= stock_info.close %></span>
         <span class="btn-flat white">今开盘<%= stock_info.open %></span>
-        <span class="btn-flat white">最高价<%= stock_info %></span>
-        <span class="btn-flat white">最低价<%= stock_info %></span>
+        <span class="btn-flat white">最高价<%= stock_info.high %></span>
+        <span class="btn-flat white">最低价<%= stock_info.low %></span>
     </script>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.1.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
@@ -229,7 +229,7 @@
 
         // The View for a Person
         var OneStockView = Backbone.View.extend({
-            tagName: 'li',
+            tagName: 'ul',
 
             template: _.template($('#realtime_template').html() ),
             
