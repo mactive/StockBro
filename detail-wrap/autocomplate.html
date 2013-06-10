@@ -150,7 +150,7 @@
 
         window.OneShockCollection=Backbone.Collection.extend({
             model:OneStockModel,
-            url:'http://api.stockpro.com/stock/realtime/ddd',
+            url:'http://api.stockbro.com/stock/realtime/ddd',
             initialize:function(){
                 this.bind('reset',this.showAll);
                 this.bind('add',this.showAll);
@@ -204,9 +204,9 @@
         theCollection.fetch({url:'http://api.stockpro.com/stock/realtime/ddd',
             success:function(collection,response){
                 collection.each(function(single){
-                    console.log("success"+single.get('name'));
-                    console.log("success"+single.get('buy1'));
-                    console.log("success"+single.get('volumn_buy1'));
+                    // console.log("success"+single.get('name'));
+                    // console.log("success"+single.get('buy1'));
+                    // console.log("success"+single.get('volumn_buy1'));
                 })
             },
             error:function(collection, response){
@@ -219,12 +219,14 @@
         ///////////////////////////
         window.OneStockView = Backbone.View.extend({
             el: $("#stock_realtime"),
-            collection: theCollection,
             initialize: function(){
-                console.log(theCollection);
-                console.log(theCollection.models);
+                console.log(this.collection);
+                this.collection.each(function(person) {
+                    console.log(person);
+                    console.log('=====');
+                });
 
-                this.listenTo(theCollection, 'showRealtime', this.render(stock_info));
+                this.listenTo(this.collection, 'showRealtime', this.render(stock_info));
             },
 
             render: function(stock_info) {
@@ -238,7 +240,7 @@
             },
 
         });
-        var searchView = new OneStockView();
+        var searchView = new OneStockView({ collection: theCollection });
 
 
 

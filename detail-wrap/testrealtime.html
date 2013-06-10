@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AutoComplate</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- bootstrap -->
+    <link href="css/bootstrap/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/bootstrap/bootstrap-overrides.css" type="text/css" rel="stylesheet">
+
+    <!-- global styles -->
+    <link rel="stylesheet" type="text/css" href="css/layout.css">
+    <link rel="stylesheet" type="text/css" href="css/elements.css">
+    <link rel="stylesheet" type="text/css" href="css/icons.css">
+
+    <!-- libraries -->
+    <link rel="stylesheet" type="text/css" href="css/lib/font-awesome.css">
+    
+    <!-- this page specific styles -->
+    <link rel="stylesheet" href="css/compiled/web-app-icons.css" type="text/css" media="screen" />
+
+    <!-- open sans font -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- libraries -->
+    <link href="css/autocomplate.css" rel="stylesheet" type="text/css">
+    <link href="css/stock.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<section>
+    <div id="example">
+        <h3>Example</h3>
+        <form action="#">
+            <input type="text" placeholder="Stock symbol or short" id="plugin" onkeyup="this.value=this.value.toLocaleUpperCase()"/>
+        </form>
+    </div>
+    <div id="selected" class="span3 stat">
+        <h3>Selected Item</h3>
+        <p></p>
+    </div>
+    <div id="chart" class="clear">
+        <img src="" alt="">
+    </div>
+
+    <div id="stock_realtime" class="realtime">
+
+    </div>
+
+</section>
+
+</body>
+    <script type="text/template" id="realtime_template">
+        <span class="btn-flat white">代码<%= stock_info.symbol %></span>
+        <span class="btn-flat white">名称<%= stock_info.name %></span>
+        <span class="btn-flat white">昨收盘<%= stock_info.close %></span>
+        <span class="btn-flat white">今开盘<%= stock_info.open %></span>
+        <span class="btn-flat white">最高价<%= stock_info %></span>
+        <span class="btn-flat white">最低价<%= stock_info %></span>
+    </script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
+<script type="text/javascript" src="http://backbonejs.org/backbone-min.js"></script>
+<script src="/js/backbone.autocomplete.js"></script>
+<script src="/js/stock.list.objects.js"></script>
+<script type="text/javascript">
+    $(function () {
+
+        /* ================================
+         * AutoComplate 
+         * ================================ 
+         */ 
+
+        var Plugin = Backbone.Model.extend({
+            label: function () {
+                return this.get("symbol") +"  "+ this.get("short") ;
+            },
+            label_for_show: function(){
+                return this.get("symbol") +" "+ this.get("name") ;
+            }
+        });
+
+        var PluginCollection = Backbone.Collection.extend({
+            model: Plugin
+        });
+
+        // object {"symbol":"sz000030","short":"FAGF","name":"富奥股份"},
+        var plugins = new PluginCollection(STOCK_LIST_OBJECTS);
+
+        new AutoCompleteView({
+            input: $("#plugin"),
+            model: plugins,
+            onSelect: function (model) {
+                // AutoComplate list
+                $("#selected").show().find("p").html(model.label_for_show());
+                // Chart Image
+                $("#chart").find("img").attr('src','http://chart.7878.com/kd/'+model.get("symbol")+'.gif');
+            }
+        }).render();
+
+
+        /* 
+         * =============================================================
+         * fetch 
+         * ============================================================= 
+         */ 
+
+        // Person Model
+        var Person = Backbone.Model.extend({
+            defaults: {
+                name: 'Guest User',
+                age: 30,
+                occupation: 'worker'
+            }
+        });
+
+        // A List of People
+        var PeopleCollection = Backbone.Collection.extend({
+            model: Person
+        });
+
+
+        // View for all people
+        var PeopleView = Backbone.View.extend({
+            tagName: 'ul',
+
+            render: function() {
+                this.collection.each(function(person) {
+                    var personView = new PersonView({ model: person });
+                    this.$el.append(personView.render().el);
+                }, this);
+
+                return this;
+            }
+        });
+
+        // The View for a Person
+        var PersonView = Backbone.View.extend({
+            tagName: 'li',
+
+
+            template: _.template($('#personTemplate').html() ),
+            
+            render: function() {
+                this.$el.html( this.template(this.model.toJSON()) );
+                return this;
+            }
+        });
+
+        var peopleCollection = new PeopleCollection(
+            {
+                name: 'Mohit Jain',
+                age: 26
+            });
+
+        var peopleView = new PeopleView({ collection: peopleCollection });
+        $(document.body).append(peopleView.render().el);
+
+
+
+
+    });
+</script>
+
+</html>
