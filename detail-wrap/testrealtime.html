@@ -194,23 +194,13 @@
                 });
 
                 return objects;
-            },
-            renderItem:function(){
-                console.log('renderItem');
-                this.each(function(single) {
-                    console.log("collection symbol:");
-                    console.log(single.toJSON());
-
-                    var oneStockView = new OneStockView({ model: single });
-                    $('#stock_realtime').append(oneStockView.render().el);
-                }, this);
             }
         });
 
 
         // View for all people
         var StocksView = Backbone.View.extend({
-            tagName: 'ul',
+            tagName: 'div.area',
             initialize: function(){
                 // this.listenTo(this.collection, 'add', this.render());
             },
@@ -248,13 +238,10 @@
             success:function(collection,response){
                 console.log(collection);
                 console.log(response);
-                theStocksCollection.renderItem();
 
-                collection.each(function(single){
-                    console.log("collection symbol:"+single.get('symbol'));
-                    // console.log("success"+single.get('name'));
-                    // console.log("success"+single.get('volumn_buy1'));
-                })
+                var peopleView = new StocksView({ collection: theStocksCollection });
+                $('#stock_realtime').append(peopleView.render().el);
+
             },
             error:function(collection, response){
                 console.log(collection);
@@ -264,8 +251,7 @@
         });
 
 
-        // var peopleView = new StocksView({ collection: theStocksCollection });
-        // $('#stock_realtime').append(peopleView.render().el);
+
 
 
 
