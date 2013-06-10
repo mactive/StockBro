@@ -6,28 +6,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- bootstrap -->
-    <link href="css/bootstrap/bootstrap.css" rel="stylesheet">
-    <link href="css/bootstrap/bootstrap-responsive.css" rel="stylesheet">
-    <link href="css/bootstrap/bootstrap-overrides.css" type="text/css" rel="stylesheet">
-
-    <!-- global styles -->
-    <link rel="stylesheet" type="text/css" href="css/layout.css">
-    <link rel="stylesheet" type="text/css" href="css/elements.css">
-    <link rel="stylesheet" type="text/css" href="css/icons.css">
-
-    <!-- libraries -->
-    <link rel="stylesheet" type="text/css" href="css/lib/font-awesome.css">
-    
-    <!-- this page specific styles -->
-    <link rel="stylesheet" href="css/compiled/web-app-icons.css" type="text/css" media="screen" />
-
-    <!-- open sans font -->
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
     <!-- libraries -->
     <link href="css/autocomplate.css" rel="stylesheet" type="text/css">
     <link href="css/stock.css" rel="stylesheet" type="text/css">
@@ -42,15 +20,15 @@
     </div>
     <div id="selected" class="span3 stat">
         <h3>Selected Item</h3>
-        <p></p>
+        <div id="stock_realtime" class="realtime">
+
+        </div>
     </div>
     <div id="chart" class="clear">
         <img src="" alt="">
     </div>
 
-    <div id="stock_realtime" class="realtime">
 
-    </div>
 
 </section>
 
@@ -100,17 +78,35 @@
                 $("#selected").show().find("p").html(model.label_for_show());
                 // Chart Image
                 $("#chart").find("img").attr('src','http://chart.7878.com/kd/'+model.get("symbol")+'.gif');
+
+                /* Stcok realtime */
+                var theStocksCollection = new StocksCollection();
+                theStocksCollection.fetch({url:'http://api.stockbro.com/stock/realtime/ddd',
+                    success:function(collection,response){
+                        console.log(collection);
+                        console.log(response);
+
+                        var peopleView = new StocksView({ collection: theStocksCollection });
+                        $('#stock_realtime').append(peopleView.render().el);
+
+                    },
+                    error:function(collection, response){
+                        console.log(collection);
+                        console.log(response);
+                        alert('error');
+                    }
+                });
             }
         }).render();
 
 
         /* 
          * =============================================================
-         * fetch 
+         * fetch realtime
          * ============================================================= 
          */ 
 
-        // Person Model
+        // Stock Model
         var OneStockModel = Backbone.Model.extend({
             initialize:function(){
                 console.log("create a model");
@@ -149,7 +145,7 @@
             }
         });
 
-        // A List of People
+        // A List of Stock
         var StocksCollection = Backbone.Collection.extend({
             model: OneStockModel,
             parse:function(objects){
@@ -198,13 +194,8 @@
         });
 
 
-        // View for all people
+        // View for all stocks
         var StocksView = Backbone.View.extend({
-            tagName: 'div.area',
-            initialize: function(){
-                // this.listenTo(this.collection, 'add', this.render());
-            },
-
             render: function() {
                 this.collection.each(function(person) {
                     console.log(person);
@@ -217,7 +208,7 @@
             }
         });
 
-        // The View for a Person
+        // The View for an stcok
         var OneStockView = Backbone.View.extend({
             tagName: 'ul',
 
@@ -232,23 +223,6 @@
             }
         });
 
-        
-        var theStocksCollection = new StocksCollection();
-        theStocksCollection.fetch({url:'http://api.stockbro.com/stock/realtime/ddd',
-            success:function(collection,response){
-                console.log(collection);
-                console.log(response);
-
-                var peopleView = new StocksView({ collection: theStocksCollection });
-                $('#stock_realtime').append(peopleView.render().el);
-
-            },
-            error:function(collection, response){
-                console.log(collection);
-                console.log(response);
-                alert('error');
-            }
-        });
 
 
 
