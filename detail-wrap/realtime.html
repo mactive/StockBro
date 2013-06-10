@@ -9,6 +9,9 @@
     <!-- libraries -->
     <link href="css/autocomplate.css" rel="stylesheet" type="text/css">
     <link href="css/stock.css" rel="stylesheet" type="text/css">
+
+    <!-- bootstrap -->
+    <link href="css/bootstrap/bootstrap.css" rel="stylesheet" />
 </head>
 <body>
 <section>
@@ -28,209 +31,120 @@
         <img src="" alt="">
     </div>
 
-
+    <div class="span12">
+        <div id="statsChart"></div>
+    </div>
 
 </section>
 
 </body>
-    <script type="text/template" id="realtime_template">
-        <span class="btn-flat white">代码<%= stock_info.symbol %></span>
-        <span class="btn-flat white">名称<%= stock_info.name %></span>
-        <span class="btn-flat white">昨收盘<%= stock_info.close %></span>
-        <span class="btn-flat white">今开盘<%= stock_info.open %></span>
-        <span class="btn-flat white">最高价<%= stock_info.high %></span>
-        <span class="btn-flat white">最低价<%= stock_info.low %></span>
-    </script>
+
+<script type="text/template" id="realtime_template">
+    <span class="btn-flat white">代码<%= stock_info.symbol %></span>
+    <span class="btn-flat white">名称<%= stock_info.name %></span>
+    <span class="btn-flat white">昨收盘<%= stock_info.close %></span>
+    <span class="btn-flat white">今开盘<%= stock_info.open %></span>
+    <span class="btn-flat white">最高价<%= stock_info.high %></span>
+    <span class="btn-flat white">最低价<%= stock_info.low %></span>
+</script>
+
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.1.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 <script type="text/javascript" src="http://backbonejs.org/backbone-min.js"></script>
-<script src="/js/backbone.autocomplete.js"></script>
-<script src="/js/stock.list.objects.js"></script>
+<!-- LIBRARY autocomplete -->
+<script src="/js/backbone.autocomplete.js" type="text/javascript"></script>
+<!-- LIBRARY flot charts -->
+<script src="js/jquery.flot.js"></script>
+<script src="js/jquery.flot.stack.js"></script>
+<script src="js/jquery.flot.resize.js"></script>
+
+<!-- 股票列表 -->
+<script src="/js/stock.list.objects.js" type="text/javascript"></script>
+<!-- auto complate 和 实时交易信息 -->
+<script src="/js/stock.realtime.js" type="text/javascript"></script>
 <script type="text/javascript">
-    $(function () {
+// jQuery Flot Chart
+            var visits = [[1, 50], [2, 40], [3, 45], [4, 23],[5, 55],[6, 65],[7, 61],[8, 70],[9, 65],[10, 75],[11, 57],[12, 59]];
+            var visitors = [[1, 25], [2, 50], [3, 23], [4, 48],[5, 38],[6, 40],[7, 47],[8, 55],[9, 43],[10,50],[11,47],[12, 39]];
 
-        /* ================================
-         * AutoComplate 
-         * ================================ 
-         */ 
-
-        var Plugin = Backbone.Model.extend({
-            label: function () {
-                return this.get("symbol") +"  "+ this.get("short") ;
-            },
-            label_for_show: function(){
-                return this.get("symbol") +" "+ this.get("name") ;
-            }
-        });
-
-        var PluginCollection = Backbone.Collection.extend({
-            model: Plugin
-        });
-
-        // object {"symbol":"sz000030","short":"FAGF","name":"富奥股份"},
-        var plugins = new PluginCollection(STOCK_LIST_OBJECTS);
-
-        new AutoCompleteView({
-            input: $("#plugin"),
-            model: plugins,
-            onSelect: function (model) {
-                // AutoComplate list
-                $("#selected").show().find("p").html(model.label_for_show());
-                // Chart Image
-                $("#chart").find("img").attr('src','http://chart.7878.com/kd/'+model.get("symbol")+'.gif');
-
-                /* Stcok realtime */
-                var theStocksCollection = new StocksCollection();
-                theStocksCollection.fetch({url:'http://api.stockbro.com/stock/realtime/ddd',
-                    success:function(collection,response){
-                        console.log(collection);
-                        console.log(response);
-
-                        var peopleView = new StocksView({ collection: theStocksCollection });
-                        $('#stock_realtime').append(peopleView.render().el);
-
+            var plot = $.plot($("#statsChart"),
+                [ { data: visits, label: "Signups"},
+                 { data: visitors, label: "Visits" }], {
+                    series: {
+                        lines: { show: true,
+                                lineWidth: 1,
+                                fill: true, 
+                                fillColor: { colors: [ { opacity: 0.1 }, { opacity: 0.13 } ] }
+                             },
+                        points: { show: true, 
+                                 lineWidth: 2,
+                                 radius: 3
+                             },
+                        shadowSize: 0,
+                        stack: true
                     },
-                    error:function(collection, response){
-                        console.log(collection);
-                        console.log(response);
-                        alert('error');
+                    grid: { hoverable: true, 
+                           clickable: true, 
+                           tickColor: "#f9f9f9",
+                           borderWidth: 0
+                        },
+                    legend: {
+                            // show: false
+                            labelBoxBorderColor: "#fff"
+                        },  
+                    colors: ["#a7b5c5", "#30a0eb"],
+                    xaxis: {
+                        ticks: [[1, "JAN"], [2, "FEB"], [3, "MAR"], [4,"APR"], [5,"MAY"], [6,"JUN"], 
+                               [7,"JUL"], [8,"AUG"], [9,"SEP"], [10,"OCT"], [11,"NOV"], [12,"DEC"]],
+                        font: {
+                            size: 12,
+                            family: "Open Sans, Arial",
+                            variant: "small-caps",
+                            color: "#697695"
+                        }
+                    },
+                    yaxis: {
+                        ticks:3, 
+                        tickDecimals: 0,
+                        font: {size:12, color: "#9da3a9"}
                     }
-                });
+                 });
+
+            function showTooltip(x, y, contents) {
+                $('<div id="tooltip">' + contents + '</div>').css( {
+                    position: 'absolute',
+                    display: 'none',
+                    top: y - 30,
+                    left: x - 50,
+                    color: "#fff",
+                    padding: '2px 5px',
+                    'border-radius': '6px',
+                    'background-color': '#000',
+                    opacity: 0.80
+                }).appendTo("body").fadeIn(200);
             }
-        }).render();
 
+            var previousPoint = null;
+            $("#statsChart").bind("plothover", function (event, pos, item) {
+                if (item) {
+                    if (previousPoint != item.dataIndex) {
+                        previousPoint = item.dataIndex;
 
-        /* 
-         * =============================================================
-         * fetch realtime
-         * ============================================================= 
-         */ 
+                        $("#tooltip").remove();
+                        var x = item.datapoint[0].toFixed(0),
+                            y = item.datapoint[1].toFixed(0);
 
-        // Stock Model
-        var OneStockModel = Backbone.Model.extend({
-            initialize:function(){
-                console.log("create a model");
-            },
-            defaults:{
-                symbol:'',
-                time:'',
-                name:'',
-                close:'',
-                open:'',
-                high:'',
-                low:'',
-                current:'',
-                volumn:'',
-                amount:'',
-                buy1:'',
-                buy2:'',
-                buy3:'',
-                buy4:'',
-                buy5:'',
-                sell1:'',
-                sell2:'',
-                sell3:'',
-                sell4:'',
-                sell5:'',
-                volumn_buy1:'',
-                volumn_buy2:'',
-                volumn_buy3:'',
-                volumn_buy4:'',
-                volumn_buy5:'',
-                volumn_sell1:'',
-                volumn_sell2:'',
-                volumn_sell3:'',
-                volumn_sell4:'',
-                volumn_sell5:''
-            }
-        });
+                        var month = item.series.xaxis.ticks[item.dataIndex].label;
 
-        // A List of Stock
-        var StocksCollection = Backbone.Collection.extend({
-            model: OneStockModel,
-            parse:function(objects){
-                var result = {};
-                console.log('parse first');
-                $.each(objects , function(key, response) {
-
-                    var item = {
-                        symbol: response.c,
-                        time:   response.t,
-                        name:   response.n,
-                        close:  response.lc,
-                        open:   response.o,
-                        high:   response.h,
-                        low:    response.l,
-                        current:    response.np,
-                        volumn: response.v,
-                        amount: response.a,
-                        buy1:   response.bp[0],
-                        buy2:   response.bp[1],
-                        buy3:   response.bp[2],
-                        buy4:   response.bp[3],
-                        buy5:   response.bp[4],
-                        sell1:  response.sp[0],
-                        sell2:  response.sp[1],
-                        sell3:  response.sp[2],
-                        sell4:  response.sp[3],
-                        sell5:  response.sp[4],
-                        volumn_buy1:    response.bv[0],
-                        volumn_buy2:    response.bv[1],
-                        volumn_buy3:    response.bv[2],
-                        volumn_buy4:    response.bv[3],
-                        volumn_buy5:    response.bv[4],
-                        volumn_sell1:   response.sv[0],
-                        volumn_sell2:   response.sv[1],
-                        volumn_sell3:   response.sv[2],
-                        volumn_sell4:   response.sv[3],
-                        volumn_sell5:   response.sv[4]
-                    };
-
-                    objects[key] = item;
-                });
-
-                return objects;
-            }
-        });
-
-
-        // View for all stocks
-        var StocksView = Backbone.View.extend({
-            render: function() {
-                this.collection.each(function(person) {
-                    console.log(person);
-
-                    var oneStockView = new OneStockView({ model: person });
-                    this.$el.append(oneStockView.render().el);
-                }, this);
-
-                return this;
-            }
-        });
-
-        // The View for an stcok
-        var OneStockView = Backbone.View.extend({
-            tagName: 'ul',
-
-            template: _.template($('#realtime_template').html() ),
-            
-            render: function() {
-                console.log("one stock view");
-
-                this.$el.html( this.template( {"stock_info":this.model.toJSON() } ) );
-                console.log(this);
-                return this;
-            }
-        });
-
-
-
-
-
-
-
-
-    });
+                        showTooltip(item.pageX, item.pageY,
+                                    item.series.label + " of " + month + ": " + y);
+                    }
+                }
+                else {
+                    $("#tooltip").remove();
+                    previousPoint = null;
+                }
+            });
 </script>
 
 </html>
