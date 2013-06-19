@@ -1,19 +1,21 @@
 var BasicModel = Backbone.Model.extend({
   validation: {
-    firstName: {
+    password: {
       required: true,
-      msg: 'Please provide your first name'
+      minLength: 6,
+      msg: '请输入密码，不少于6位'
     },
-    lastName: {
+    repassword: {
       required: true,
-      msg: 'Please provide your last name'
+      equalTo: 'password',
+      msg: '两次输入不同'
     },
     email: [{
       required: true,
-      msg: 'Please provide your email'
+      msg: '请填写邮箱'
     },{
       pattern: 'email',
-      msg: 'Email provided is not correct'
+      msg: '邮箱格式不正确'
     }]
   }
 });
